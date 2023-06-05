@@ -30,7 +30,7 @@ namespace Managers
             _instance = this;
         }
 
-        private void OnDrawGizmos()
+        /*private void OnDrawGizmos()
         {
             // This holds all graph data
             AstarData data = AstarPath.active.data;
@@ -58,7 +58,7 @@ namespace Managers
             // Scans all graphs
             AstarPath.active.Scan();
             Debug.Log("Node set");
-        }
+        }*/
 
         public void RegisterCell(GridCell gridCell)
         {
