@@ -31,9 +31,13 @@ namespace Entities.Unit
             // Path requests are asynchronous, so when the OnPathComplete method is called depends on how long it
             // takes to calculate the path. Usually it is called the next frame.
             seeker.pathCallback += OnPathComplete;
-            seeker.StartPath(transform.position, targetPosition.position);
+            StartPath();
         }
 
+        private void StartPath()
+        {
+            seeker.StartPath(transform.position, (Vector3)AstarPath.active.GetNearest(targetPosition.position, NNConstraint.Default).node.position);
+        }
 
         private void OnDisable()
         {
@@ -70,7 +74,7 @@ namespace Entities.Unit
 
                 // Start a new path to the targetPosition, call the the OnPathComplete function
                 // when the path has been calculated (which may take a few frames depending on the complexity)
-                seeker.StartPath(transform.position, AstarPath.active.GetNearest(targetPosition.position, NNConstraint.Default).position);
+                StartPath();
             }
 
             if (path == null)
@@ -93,7 +97,7 @@ namespace Entities.Unit
                 if (distanceToWaypoint < nextWaypointDistance)
                 {
                     // Check if there is another waypoint or if we have reached the end of the path
-                    if (currentWaypoint + 1 < path.vectorPath.Count)
+                    if (currentWaypoint + 1 < path.vectorPath.Count-1)
                     {
                         currentWaypoint++;
                     }
