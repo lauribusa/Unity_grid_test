@@ -70,7 +70,7 @@ namespace Entities.Unit
 
                 // Start a new path to the targetPosition, call the the OnPathComplete function
                 // when the path has been calculated (which may take a few frames depending on the complexity)
-                seeker.StartPath(transform.position, targetPosition.position);
+                seeker.StartPath(transform.position, AstarPath.active.GetNearest(targetPosition.position, NNConstraint.Default).position);
             }
 
             if (path == null)
@@ -93,7 +93,7 @@ namespace Entities.Unit
                 if (distanceToWaypoint < nextWaypointDistance)
                 {
                     // Check if there is another waypoint or if we have reached the end of the path
-                    if (currentWaypoint + 1 < path.vectorPath.Count-1)
+                    if (currentWaypoint + 1 < path.vectorPath.Count)
                     {
                         currentWaypoint++;
                     }

@@ -16,6 +16,13 @@ namespace Managers
         [SerializeField]
         private GridGraph _graph;
 
+        [SerializeField]
+        private AstarPath AstarPath;
+
+        public float refreshGrid;
+
+        private float elapsedTime = 0f;
+
         private void Awake()
         {
             if (FindObjectsOfType<GridManager>().Length > 1)
@@ -28,6 +35,17 @@ namespace Managers
                 Destroy(this.gameObject);
             }
             _instance = this;
+        }
+
+        private void Update()
+        {
+            elapsedTime += Time.deltaTime;
+            if(elapsedTime > refreshGrid)
+            {
+                elapsedTime = 0f;
+                //AstarPath.active.Scan();
+            }
+            
         }
 
         /*private void OnDrawGizmos()
