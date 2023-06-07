@@ -1,6 +1,8 @@
 using Pathfinding;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Entities.Unit
 {
@@ -22,7 +24,14 @@ namespace Entities.Unit
         public bool reachedEndOfPath;
 
         public float repathRate = 0.5f;
+
+        private BlockManager.TraversalProvider traversalProvider;
         private float lastRepath = float.NegativeInfinity;
+
+        [SerializeField]
+        private SingleNodeBlocker Blocker;
+
+        public List<SingleNodeBlocker> obstacles;
 
         public void Start()
         {
@@ -30,19 +39,50 @@ namespace Entities.Unit
             // Start to calculate a new path to the targetPosition object, return the result to the OnPathComplete method.
             // Path requests are asynchronous, so when the OnPathComplete method is called depends on how long it
             // takes to calculate the path. Usually it is called the next frame.
+            GetBlockManager();
             seeker.pathCallback += OnPathComplete;
             StartPath();
         }
 
         private void StartPath()
         {
+            var path = ABPath.Construct(transform.position, targetPosition.position, null);
+
+            // Make the path use a specific traversal provider
+            path.traversalProvider = traversalProvider;
+
+            // Calculate the path synchronously
+            //AstarPath.StartPath(path);
             seeker.StartPath(transform.position, (Vector3)AstarPath.active.GetNearest(targetPosition.position, NNConstraint.Default).node.position);
+            path.BlockUntilCalculated();
+            if (path.error)
+            {
+                Debug.Log("No path was found");
+            }
+            else
+            {
+                Debug.Log("A path was found with " + path.vectorPath.Count + " nodes");
+
+                // Draw the path in the scene view
+                for (int i = 0; i < path.vectorPath.Count - 1; i++)
+                {
+                    Debug.DrawLine(path.vectorPath[i], path.vectorPath[i + 1], Color.red);
+                }
+            }
         }
 
         private void OnDisable()
         {
             seeker.pathCallback-= OnPathComplete;
         }
+
+        private void GetBlockManager()
+        {
+            var blockManager = ServiceProvider.Instance.BlockManager;
+            Blocker.manager = blockManager;
+            traversalProvider = new BlockManager.TraversalProvider(blockManager, BlockManager.BlockMode.OnlySelector, obstacles);
+        }
+
         public void OnPathComplete(Path p)
         {
             Debug.Log("A path was calculated. Did it fail with an error? " + p.error);
@@ -68,6 +108,9 @@ namespace Entities.Unit
 
         public void Update()
         {
+
+            Blocker.BlockAtCurrentPosition();
+
             if (Time.time > lastRepath + repathRate && seeker.IsDone())
             {
                 lastRepath = Time.time;
@@ -82,6 +125,7 @@ namespace Entities.Unit
                 // We have no path to follow yet, so don't do anything
                 return;
             }
+
 
             // Check in a loop if we are close enough to the current waypoint to switch to the next one.
             // We do this in a loop because many waypoints might be close to each other and we may reach
