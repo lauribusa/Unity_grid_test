@@ -1,17 +1,17 @@
 using Pathfinding;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
-using static UnityEngine.GraphicsBuffer;
 
 namespace Entities.Unit
 {
+    /*
+        TODO: Get target destination connections, calculate which is closer, and move to those when close enough.
+     */
     public class BaseUnit : MonoBehaviour
     {
         public Transform targetPosition;
 
-        [SerializeField]
         private Seeker seeker;
+        private CharacterController controller;
 
         public Path path;
 
@@ -21,66 +21,17 @@ namespace Entities.Unit
 
         private int currentWaypoint = 0;
 
-        public bool reachedEndOfPath;
-
         public float repathRate = 0.5f;
-
-        private BlockManager.TraversalProvider traversalProvider;
         private float lastRepath = float.NegativeInfinity;
 
-        [SerializeField]
-        private SingleNodeBlocker Blocker;
-
-        public List<SingleNodeBlocker> obstacles;
+        public bool reachedEndOfPath;
 
         public void Start()
         {
-
-            // Start to calculate a new path to the targetPosition object, return the result to the OnPathComplete method.
-            // Path requests are asynchronous, so when the OnPathComplete method is called depends on how long it
-            // takes to calculate the path. Usually it is called the next frame.
-            GetBlockManager();
-            seeker.pathCallback += OnPathComplete;
-            StartPath();
-        }
-
-        private void StartPath()
-        {
-            var path = ABPath.Construct(transform.position, targetPosition.position, null);
-
-            // Make the path use a specific traversal provider
-            path.traversalProvider = traversalProvider;
-
-            // Calculate the path synchronously
-            //AstarPath.StartPath(path);
-            seeker.StartPath(transform.position, (Vector3)AstarPath.active.GetNearest(targetPosition.position, NNConstraint.Default).node.position);
-            path.BlockUntilCalculated();
-            if (path.error)
-            {
-                Debug.Log("No path was found");
-            }
-            else
-            {
-                Debug.Log("A path was found with " + path.vectorPath.Count + " nodes");
-
-                // Draw the path in the scene view
-                for (int i = 0; i < path.vectorPath.Count - 1; i++)
-                {
-                    Debug.DrawLine(path.vectorPath[i], path.vectorPath[i + 1], Color.red);
-                }
-            }
-        }
-
-        private void OnDisable()
-        {
-            seeker.pathCallback-= OnPathComplete;
-        }
-
-        private void GetBlockManager()
-        {
-            var blockManager = ServiceProvider.Instance.BlockManager;
-            Blocker.manager = blockManager;
-            traversalProvider = new BlockManager.TraversalProvider(blockManager, BlockManager.BlockMode.OnlySelector, obstacles);
+            seeker = GetComponent<Seeker>();
+            // If you are writing a 2D game you can remove this line
+            // and use the alternative way to move sugggested further below.
+            controller = GetComponent<CharacterController>();
         }
 
         public void OnPathComplete(Path p)
@@ -108,16 +59,13 @@ namespace Entities.Unit
 
         public void Update()
         {
-
-            Blocker.BlockAtCurrentPosition();
-
             if (Time.time > lastRepath + repathRate && seeker.IsDone())
             {
                 lastRepath = Time.time;
 
                 // Start a new path to the targetPosition, call the the OnPathComplete function
                 // when the path has been calculated (which may take a few frames depending on the complexity)
-                StartPath();
+                seeker.StartPath(transform.position, targetPosition.position, OnPathComplete);
             }
 
             if (path == null)
@@ -125,7 +73,6 @@ namespace Entities.Unit
                 // We have no path to follow yet, so don't do anything
                 return;
             }
-
 
             // Check in a loop if we are close enough to the current waypoint to switch to the next one.
             // We do this in a loop because many waypoints might be close to each other and we may reach
@@ -141,7 +88,7 @@ namespace Entities.Unit
                 if (distanceToWaypoint < nextWaypointDistance)
                 {
                     // Check if there is another waypoint or if we have reached the end of the path
-                    if (currentWaypoint + 1 < path.vectorPath.Count-1)
+                    if (currentWaypoint + 1 < path.vectorPath.Count-2)
                     {
                         currentWaypoint++;
                     }
@@ -168,6 +115,10 @@ namespace Entities.Unit
             Vector3 dir = (path.vectorPath[currentWaypoint] - transform.position).normalized;
             // Multiply the direction by our desired speed to get a velocity
             Vector3 velocity = dir * speed * speedFactor;
+
+            // Move the agent using the CharacterController component
+            // Note that SimpleMove takes a velocity in meters/second, so we should not multiply by Time.deltaTime
+            // controller.SimpleMove(velocity);
 
             // If you are writing a 2D game you may want to remove the CharacterController and instead modify the position directly
             transform.position += velocity * Time.deltaTime;
