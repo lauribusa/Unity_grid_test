@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6093594206232338969}
   - component: {fileID: 3710709742551434858}
   - component: {fileID: 2511831289299365245}
+  - component: {fileID: 4868775385973479228}
   m_Layer: 9
   m_Name: AIUnit
   m_TagString: Untagged
@@ -61,7 +62,7 @@ MonoBehaviour:
       serializedVersion: 2
       m_Bits: 4294967295
     useGraphRaycasting: 0
-  traversableTags: -1
+  traversableTags: -7
   tagPenalties: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   graphMask:
     value: 1
@@ -78,13 +79,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetPosition: {fileID: 0}
-  seeker: {fileID: 6093594206232338949}
+  graphUpdate: {fileID: 4868775385973479228}
+  shouldRepath: 1
   speed: 2
   nextWaypointDistance: 1
-  reachedEndOfPath: 0
   repathRate: 0.5
-  Blocker: {fileID: 0}
-  obstacles: []
+  reachedEndOfPath: 0
 --- !u!114 &6093594206232338968
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166,7 +166,7 @@ CircleCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6093594206232338948}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 1
@@ -189,3 +189,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   version: 1
   manager: {fileID: 0}
+--- !u!114 &4868775385973479228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6093594206232338948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efee954c69f0d421086729bb8df1137f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 1
+  uniqueID: 9082675919418118615
+  points: []
+  convex: 1
+  minBoundsHeight: 1
+  penaltyDelta: 0
+  modifyWalkability: 0
+  setWalkability: 0
+  applyOnStart: 1
+  applyOnScan: 1
+  updatePhysics: 0
+  resetPenaltyOnPhysics: 1
+  updateErosion: 1
+  modifyTag: 1
+  setTag: 1
+  legacyMode: 0
+  serializedVersion: 1
+  legacyUseWorldSpace: 0

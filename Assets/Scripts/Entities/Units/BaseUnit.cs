@@ -8,10 +8,18 @@ namespace Entities.Unit
      */
     public class BaseUnit : MonoBehaviour
     {
-        public Transform targetPosition;
 
+        // *
+        // https://arongranberg.com/astar/docs/graphupdates.html
+        // test by forcing tags when unit leaves node to make them avoid each other.
+        //
+        // * /
+        public Transform targetPosition;
+        public GraphUpdateScene graphUpdate;
         private Seeker seeker;
         private CharacterController controller;
+
+        public bool shouldRepath;
 
         public Path path;
 
@@ -25,6 +33,8 @@ namespace Entities.Unit
         private float lastRepath = float.NegativeInfinity;
 
         public bool reachedEndOfPath;
+
+        public GraphNode CurrentlyHeldNode;
 
         public void Start()
         {
@@ -50,6 +60,8 @@ namespace Entities.Unit
                 path = p;
                 // Reset the waypoint counter so that we start to move towards the first point in the path
                 currentWaypoint = 0;
+
+                shouldRepath = true;
             }
             else
             {
@@ -57,9 +69,19 @@ namespace Entities.Unit
             }
         }
 
+        public void ClaimCurrentNode()
+        {
+            AstarPath.active.AddWorkItem(new AstarWorkItem(() => {
+                // Safe to update graphs here
+                var node = AstarPath.active.GetNearest(transform.position).node;
+                
+            }));
+            graphUpdate.setTag = 1;
+        }
+
         public void Update()
         {
-            if (Time.time > lastRepath + repathRate && seeker.IsDone())
+            if (Time.time > lastRepath + repathRate && seeker.IsDone() && shouldRepath)
             {
                 lastRepath = Time.time;
 
@@ -79,8 +101,8 @@ namespace Entities.Unit
             // several of them in the same frame.
             reachedEndOfPath = false;
             // The distance to the next waypoint in the path
-            float distanceToWaypoint;
-            while (true)
+            float distanceToWaypoint = 0f;
+            while (!reachedEndOfPath)
             {
                 // If you want maximum performance you can check the squared distance instead to get rid of a
                 // square root calculation. But that is outside the scope of this tutorial.
@@ -90,17 +112,19 @@ namespace Entities.Unit
                     // Check if there is another waypoint or if we have reached the end of the path
                     if (currentWaypoint + 1 < path.vectorPath.Count-2)
                     {
+                        ClaimCurrentNode();
                         currentWaypoint++;
                     }
                     else
                     {
                         // Set a status variable to indicate that the agent has reached the end of the path.
                         // You can use this to trigger some special code if your game requires that.
+                        Debug.Log($"ReachedEndOfPath");
                         reachedEndOfPath = true;
+                        shouldRepath= false;
                         break;
                     }
-                }
-                else
+                } else
                 {
                     break;
                 }
