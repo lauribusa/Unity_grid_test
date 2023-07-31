@@ -50,12 +50,12 @@ namespace Entities.Unit
         {
             _destinationSetter.enabled = false;
             var position = target.transform.position;
-            var shortestDistance = Vector3.Distance(position, position);
             var targetSlot = slots[0].position;
+            var shortestDistance = Vector3.Distance(targetSlot, position);
             foreach (var slot in slots)
             {
                 var distance = Vector3.Distance(position, target.transform.position);
-                if (!(distance < shortestDistance)) continue;
+                if (distance >= shortestDistance) continue;
                 shortestDistance = distance;
                 targetSlot = slot.position;
             }
