@@ -441,6 +441,10 @@ PrefabInstance:
       propertyPath: enableRotation
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 891692194, guid: a954a33fc25d888428c7887efa5f7f87, type: 3}
+      propertyPath: endReachedDistance
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1653614001738665352, guid: a954a33fc25d888428c7887efa5f7f87, type: 3}
       propertyPath: m_Name
       value: AIUnit Test (1)
@@ -1051,6 +1055,10 @@ PrefabInstance:
     - target: {fileID: 891692194, guid: a954a33fc25d888428c7887efa5f7f87, type: 3}
       propertyPath: enableRotation
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 891692194, guid: a954a33fc25d888428c7887efa5f7f87, type: 3}
+      propertyPath: endReachedDistance
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1653614001738665352, guid: a954a33fc25d888428c7887efa5f7f87, type: 3}
       propertyPath: m_Name
