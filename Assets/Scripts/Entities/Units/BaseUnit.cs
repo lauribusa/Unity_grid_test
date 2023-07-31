@@ -1,4 +1,5 @@
 using Pathfinding;
+using Pathfinding.Ionic.Zlib;
 using UnityEngine;
 
 namespace Entities.Unit
@@ -17,11 +18,12 @@ namespace Entities.Unit
         public Transform targetPosition;
         public GraphUpdateScene graphUpdate;
         private Seeker seeker;
-        private CharacterController controller;
 
         public bool shouldRepath;
 
         public Path path;
+
+        private Bounds bounds;
 
         public float speed = 2;
 
@@ -41,7 +43,7 @@ namespace Entities.Unit
             seeker = GetComponent<Seeker>();
             // If you are writing a 2D game you can remove this line
             // and use the alternative way to move sugggested further below.
-            controller = GetComponent<CharacterController>();
+            bounds = GetComponent<Collider2D>().bounds;
         }
 
         public void OnPathComplete(Path p)
@@ -71,12 +73,11 @@ namespace Entities.Unit
 
         public void ClaimCurrentNode()
         {
-            AstarPath.active.AddWorkItem(new AstarWorkItem(() => {
+            AstarPath.active.AddWorkItem(() => {
                 // Safe to update graphs here
-                var node = AstarPath.active.GetNearest(transform.position).node;
-                
-            }));
-            graphUpdate.setTag = 1;
+                AstarPath.active.UpdateGraphs(bounds);
+                Debug.Log($"UpdatingGraph?");
+            });
         }
 
         public void Update()
