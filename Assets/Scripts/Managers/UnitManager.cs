@@ -6,13 +6,13 @@ namespace Managers
 {
     public struct UnitTrajectory
     {
-        public OnEndReached targetingUnit;
-        public OnEndReached targetedUnit;
+        public AutobattlerUnit targetingUnit;
+        public AutobattlerUnit targetedUnit;
     }
     public class UnitManager : MonoBehaviour
     {
         public static UnitManager Instance;
-        public List<OnEndReached> Units = new();
+        public List<AutobattlerUnit> Units = new();
         public List<UnitTrajectory> Trajectories = new List<UnitTrajectory>();
 
         private void Awake()
@@ -20,12 +20,12 @@ namespace Managers
             Instance = this;
         }
 
-        public void RegisterToList(OnEndReached unit)
+        public void RegisterToList(AutobattlerUnit unit)
         {
             Units.Add(unit);
         }
 
-        public UnitTrajectory RegisterTrajectory(OnEndReached targetingUnit, OnEndReached targetedUnit)
+        public UnitTrajectory RegisterTrajectory(AutobattlerUnit targetingUnit, AutobattlerUnit targetedUnit)
         {
             var trajectory = new UnitTrajectory() { targetingUnit = targetingUnit, targetedUnit = targetedUnit };
             Trajectories.Add(trajectory);
@@ -34,8 +34,8 @@ namespace Managers
 
         public UnitTrajectory RegisterTrajectory(Transform targetingUnit, Transform targetedUnit)
         {
-            var targeting = targetingUnit.GetComponent<OnEndReached>();
-            var targeted = targetedUnit.GetComponent<OnEndReached>();
+            var targeting = targetingUnit.GetComponent<AutobattlerUnit>();
+            var targeted = targetedUnit.GetComponent<AutobattlerUnit>();
 
             return RegisterTrajectory(targeting, targeted);
         }

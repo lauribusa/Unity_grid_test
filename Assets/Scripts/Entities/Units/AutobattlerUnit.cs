@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Entities.Unit
 {
-    public class OnEndReached: MonoBehaviour
+    public class AutobattlerUnit: MonoBehaviour
     {
         [SerializeField]
         private AIPath AIPath;
@@ -23,35 +23,16 @@ namespace Entities.Unit
         private void Start()
         {
             UnitManager.Instance.RegisterToList(this);
-            MyTaskAsync();
+            OnTargetReachedAsync();
         }
 
-        private void OnTargetReached(Collision target)
-        {
-            _destinationSetter.enabled = false;
-            var position = target.transform.position;
-            var targetPos = position;
-            var shortestDistance = Vector3.Distance(targetPos, position);
-            var targetSlot = slots[0].position;
-            foreach (var slot in slots)
-            {
-                var distance = Vector3.Distance(targetPos, target.transform.position);
-                if (distance < shortestDistance)
-                {
-                    shortestDistance = distance;
-                    targetSlot = slot.position;
-                }
-            }
-
-            target.transform.position = targetSlot;
-        }
-
-        public void OnTargetReached(OnEndReached target)
+        public void OnTargetReached(AutobattlerUnit target)
         {
             _destinationSetter.enabled = false;
             var position = target.transform.position;
             var targetSlot = slots[0].position;
             var shortestDistance = Vector3.Distance(targetSlot, position);
+            //TODO: Iterate through ALL available slots from both units to determine the closest distance to a valid slot.
             foreach (var slot in slots)
             {
                 var distance = Vector3.Distance(position, target.transform.position);
@@ -65,13 +46,7 @@ namespace Entities.Unit
             AIPath.canMove = false;
         }
 
-        private void OnCollisionEnter(Collision other)
-        {
-            
-            //OnTargetReached(other);
-        }
-
-        private async void MyTaskAsync()
+        private async void OnTargetReachedAsync()
         {
             _cancellationToken = new CancellationTokenSource();
             Debug.Log("Async Task Started on: " + gameObject);
@@ -115,7 +90,7 @@ namespace Entities.Unit
             _cancellationToken.Cancel();
         }
 
-        public async void MoveTo(Vector3 position)
+        private async void MoveTo(Vector3 position)
         {
             var speed = 2;
             var duration = 1f;
